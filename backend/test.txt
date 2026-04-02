@@ -1,0 +1,15 @@
+﻿--- Training Voice Model (Classification) ---
+Random Forest Accuracy: 0.9231
+SVM Accuracy: 0.9231
+KNN Accuracy: 0.9231
+** Best Voice Model: Random Forest with Accuracy is 0.9231 **
+Saved voice model to E:\APP E TEASER\new\NeuroLens-v2\NeuroLens-v2\model\model.pkl
+
+--- Training Motor Model (Regression) ---
+Random Forest R2 Score: 0.9208 | MSE: 8.7808
+SVM R2 Score: 0.2914 | MSE: 78.5195
+KNN R2 Score: 0.6677 | MSE: 36.8254
+** Best Motor Model: Random Forest with R2 is 0.9208 **
+Saved motor model to E:\APP E TEASER\new\NeuroLens-v2\NeuroLens-v2\model\motor_model.pkl
+
+Done gathering and selecting best models.
