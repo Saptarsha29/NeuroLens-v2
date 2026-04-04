@@ -84,8 +84,21 @@ export default function History() {
                     className="border-b border-slate-700/50 hover:bg-slate-800/80 cursor-pointer transition-colors"
                   >
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <p className="font-medium text-slate-100">{r.date}</p>
-                      <p className="text-xs text-slate-500">{r.time}</p>
+                      {r.created_at_iso ? (
+                        <>
+                          <p className="font-medium text-slate-100">
+                            {new Date(r.created_at_iso).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {new Date(r.created_at_iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-medium text-slate-100">{r.date}</p>
+                          <p className="text-xs text-slate-500">{r.time}</p>
+                        </>
+                      )}
                     </td>
                     <td className="px-4 py-3 font-mono">{r.voice_score?.toFixed(1)}</td>
                     <td className="px-4 py-3 font-mono">{r.spiral_score?.toFixed(1)}</td>

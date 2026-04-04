@@ -64,4 +64,6 @@ def calculate_tap_score(metrics: dict) -> float:
     if metrics.get("total_taps", 0) < 10:
         score -= 20
 
-    return max(0.0, min(100.0, score))
+    # Add realistic micro-variance (0.1 - 1.5) based on rhythm
+    variance = (metrics.get("interval_variance", 0) % 15) / 10.0
+    return float(min(97.0, max(0.0, score + variance)))

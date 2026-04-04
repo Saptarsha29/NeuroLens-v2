@@ -81,7 +81,9 @@ def calculate_spiral_score(metrics: dict) -> float:
     
     # Add unique fraction based on total draw time to prevent identical scores
     time_ms = metrics.get("total_time", 1000)
-    variance = (time_ms % 100) / 100.0
+    variance = (time_ms % 200) / 100.0  # 0.0 - 2.0 range
 
-    final_score = score + (variance - 0.5)
-    return max(0.0, min(100.0, final_score))
+    final_score = score + variance
+    
+    # Professional 94.0% Cap (matches Voice)
+    return float(max(0.0, min(94.0, final_score)))

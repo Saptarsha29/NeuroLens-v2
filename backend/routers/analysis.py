@@ -5,6 +5,7 @@ import warnings
 import soundfile as sf
 import speech_recognition as sr
 import numpy as np
+from scipy.signal import butter, lfilter
 from fastapi import APIRouter, HTTPException, UploadFile, File
 
 from services.voice_features import extract_voice_features
@@ -16,6 +17,17 @@ from schemas.models import SpiralRequest, TapRequest
 warnings.filterwarnings("ignore")
 
 router = APIRouter()
+
+
+def highpass_filter(data, cutoff, fs, order=5):
+    """
+    Remove low-frequency background noise (hum, fans).
+    """
+    nyq = 0.5 * fs
+    normal_cutoff = cutoff / nyq
+    b, a = butter(order, normal_cutoff, btype='high', analog=False)
+    y = lfilter(b, a, data)
+    return y
 
 
 # ---------------------------------------------------------------------------
@@ -50,41 +62,61 @@ async def analyze_voice(audio: UploadFile = File(...)):
                 "error": "The recording is completely silent! Please check your microphone selection in browser settings (it might be set to the wrong input)."
             }
             
-        # 2. Normalize and convert to strict 16-bit PCM WAV
+        # 2. Normalize and Clean
         y_normalized = y / max_amplitude
-        clean_path = tmp_path + "_clean.wav"
+        # High-pass filter only for acoustic features, not for STT
+        y_filtered = highpass_filter(y_normalized, 80, sr_lib)
         
-        # SpeechRecognition ONLY supports PCM_16. Float32 arrays look like pure static!
-        y_int16 = (y_normalized * 32767).astype(np.int16)
-        sf.write(clean_path, y_int16, sr_lib, subtype='PCM_16')
+        # Save UNFILTERED normalized audio for Google STT (it handles noise better than our filter)
+        # Added np.clip to prevent "wraparound" distortion if filtering or normalization spikes.
+        stt_path = tmp_path + "_stt.wav"
+        y_stt_int16 = (np.clip(y_normalized, -1.0, 1.0) * 32767).astype(np.int16)
+        sf.write(stt_path, y_stt_int16, sr_lib, subtype='PCM_16')
 
-        # 3. Enforce Keyword via SpeechRecognition
+        # 3. Enforce/Validate Keyword via SpeechRecognition
         recognizer = sr.Recognizer()
-        with sr.AudioFile(clean_path) as source:
+        phrase_score = 0.0
+        with sr.AudioFile(stt_path) as source:
             audio_data = recognizer.record(source)
             try:
                 text = recognizer.recognize_google(audio_data).lower()
-                if "best" not in text:
-                    return {
-                        "success": False,
-                        "error": f'You must say the keyword "I AM THE BEST". You said: "{text}"'
-                    }
+                
+                # Bulletproof consistency score: handle variations like "I'm full fit", "fully feet"
+                # target_words = ["fully", "fit", "i", "am", "i'm", "im", "full", "feet", "feel"]
+                text_words = text.split()
+                
+                # Check for "Fully" or "Full"
+                has_full = any(w in text_words for w in ["fully", "full", "fooly"])
+                # Check for "Fit" or "Feet" or "Feel"
+                has_fit = any(w in text_words for w in ["fit", "feet", "feel"])
+                
+                has_helper = any(w in text_words for w in ["i", "am", "i'm", "im", "i've"])
+                
+                if has_full and has_fit and has_helper:
+                    phrase_score = 1.0
+                elif has_full and has_fit:
+                    phrase_score = 0.9  # No "I am", just "Fully fit"
+                elif has_fit or has_full:
+                    phrase_score = 0.5  # Only part of the phrase
+                else:
+                    phrase_score = 0.0
+                
             except sr.UnknownValueError:
-                return {
-                    "success": False,
-                    "error": 'Google Speech API could not understand any words. Ensure you speak clearly into the correct microphone!'
-                }
+                text = "unrecognized"
+                phrase_score = 0.0
             except Exception as e:
                 print(f"Speech API Error: {e}")
-                # Fallback if totally offline, but we assume online
+                text = "api_error"
+                phrase_score = 0.5  # Neutral fallback
 
-        # 4. Extract Acoustic Features & Score
-        features = extract_voice_features(y_normalized, sr_lib)
-        voice_score = predict_voice_score(features)
+        # 4. Extract Acoustic Features & Score from Filtered Audio
+        features = extract_voice_features(y_filtered, sr_lib)
+        voice_score = predict_voice_score(features, phrase_score=phrase_score)
 
         return {
             "success": True,
             "voice_score": round(voice_score, 2),
+            "transcription": text,
             "features": features,
         }
     except HTTPException:
@@ -94,8 +126,8 @@ async def analyze_voice(audio: UploadFile = File(...)):
     finally:
         if os.path.exists(tmp_path):
             os.remove(tmp_path)
-        if 'clean_path' in locals() and os.path.exists(clean_path):
-            os.remove(clean_path)
+        if 'stt_path' in locals() and os.path.exists(stt_path):
+            os.remove(stt_path)
 
 
 # ---------------------------------------------------------------------------

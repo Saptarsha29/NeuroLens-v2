@@ -65,6 +65,7 @@ function scoreLabel(score) {
 export default function VoiceTest({ onComplete }) {
   const [status, setStatus] = useState('idle') // idle | recording | processing | done | error
   const [score, setScore] = useState(null)
+  const [transcription, setTranscription] = useState('')
   const [error, setError] = useState('')
   const mediaRecorderRef = useRef(null)
   const chunksRef = useRef([])
@@ -128,6 +129,7 @@ export default function VoiceTest({ onComplete }) {
       const { data } = await client.post('/analyze_voice', formData)
       if (data.success) {
         setScore(data.voice_score)
+        setTranscription(data.transcription)
         setStatus('done')
         onComplete(data.voice_score)
       } else {
@@ -143,7 +145,7 @@ export default function VoiceTest({ onComplete }) {
     <div className="card">
       <h2 className="text-lg font-semibold text-slate-100 mb-1">🎙️ Voice Stability Test</h2>
       <p className="text-sm text-slate-400 mb-4">
-        Click <strong>Start Recording</strong>, say <em>"I AM THE BEST"</em> in a steady tone for 3 seconds,
+        Click <strong>Start Recording</strong>, say <em>"I'M FULLY FIT"</em> in a steady tone for 3 seconds,
         then click <strong>Stop Recording</strong>.
       </p>
 
@@ -175,8 +177,11 @@ export default function VoiceTest({ onComplete }) {
       {status === 'done' && score !== null && (
         <div className="mt-4 p-4 bg-emerald-900/30 border border-emerald-500/20 rounded-lg">
           <p className="font-semibold text-emerald-400">✅ Voice Analysis Complete</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{score.toFixed(1)} / 100</p>
-          <p className="text-sm text-slate-400 mt-1">{scoreLabel(score)}</p>
+          <div className="flex justify-between items-baseline mt-1">
+            <p className="text-2xl font-bold text-emerald-400">{score.toFixed(1)} / 100</p>
+            <p className="text-xs text-slate-400">AI heard: "{transcription || '...'}"</p>
+          </div>
+          <p className="text-sm text-slate-400 mt-2">{scoreLabel(score)}</p>
         </div>
       )}
     </div>

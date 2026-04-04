@@ -115,6 +115,7 @@ def get_user_history(uid: str) -> list[dict]:
                 "tap_score": data.get("tap_score"),
                 "final_score": data.get("final_score"),
                 "created_at": created_dt.strftime("%Y-%m-%d %H:%M:%S"),
+                "created_at_iso": created_dt.isoformat(),
                 "date": created_dt.strftime("%Y-%m-%d"),
                 "time": created_dt.strftime("%H:%M:%S"),
             }
