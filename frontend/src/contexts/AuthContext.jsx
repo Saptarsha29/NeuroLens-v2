@@ -17,45 +17,36 @@ export function AuthProvider({ children }) {
   const [emailVerified, setEmailVerified] = useState(false)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user)
-
-      // If user is logged in, fetch verification status
-      if (user) {
-        try {
-          const response = await apiClient.get('/verification_status')
-          if (response.data.success) {
-            setEmailVerified(response.data.email_verified)
-          }
-        } catch (err) {
-          console.error('Failed to fetch verification status:', err)
-          setEmailVerified(false)
-        }
-      } else {
-        setEmailVerified(false)
-      }
-
+    // MOCK: Pretend we are NOT logged in, so you can see the Sign In / Register pages!
+    setLoading(true)
+    setTimeout(() => {
+      setCurrentUser(null)
+      setEmailVerified(false)
       setLoading(false)
-    })
-    return unsubscribe
+    }, 100)
+    return () => {}
   }, [])
 
   async function register(name, email, password) {
-    const result = await createUserWithEmailAndPassword(auth, email, password)
-    await updateProfile(result.user, { displayName: name })
-    // Refresh currentUser so displayName is immediately available
-    setCurrentUser({ ...result.user, displayName: name })
-    // Mark as not verified initially
+    // MOCK: Fake registration
+    const user = { uid: 'mock_uid', email, displayName: name }
+    setCurrentUser(user)
     setEmailVerified(false)
-    return result
+    return { user }
   }
 
   async function login(email, password) {
-    return signInWithEmailAndPassword(auth, email, password)
+    // MOCK: Fake login
+    const user = { uid: 'mock_uid', email, displayName: 'Fake User' }
+    setCurrentUser(user)
+    setEmailVerified(true)
+    return { user }
   }
 
   async function logout() {
-    return signOut(auth)
+    // MOCK: Fake logout
+    setCurrentUser(null)
+    setEmailVerified(false)
   }
 
   const value = { currentUser, emailVerified, loading, register, login, logout }

@@ -48,6 +48,13 @@ def get_current_user(
 def get_optional_user(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer),
 ) -> dict | None:
+    if credentials is None:
+        return None
+    try:
+        decoded = auth.verify_id_token(credentials.credentials)
+        return {"uid": decoded["uid"], "email": decoded.get("email", "")}
+    except Exception:
+        return None
     """
     Same as get_current_user but returns None instead of raising if
     no token is provided. Used for endpoints that work for guests too
