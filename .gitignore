@@ -27,6 +27,9 @@ frontend/dist/
 .env
 **/.env
 backend/firebase-credentials.json
+**/firebase-credentials.json
+**/serviceAccountKey.json
+**/*service-account*.json
 
 # Model/training artifacts
 *.h5

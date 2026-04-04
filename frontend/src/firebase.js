@@ -12,9 +12,8 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
-// Mock Firebase to prevent crashes since .env is missing
-const app = {}
+const app = initializeApp(firebaseConfig)
 
-export const auth = {}
-export const db = {}
-export const storage = {}
+export const auth = getAuth(app)
+export const db = getFirestore(app)
+export const storage = getStorage(app)

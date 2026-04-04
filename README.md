@@ -28,7 +28,12 @@ python -m venv venv
 pip install -r requirements.txt
 ```
 
-You will need to ensure that your Firebase configuration (`firebase-credentials.json`) is placed in the `backend/` folder.
+Configure Firebase Admin credentials using environment variables:
+
+- Preferred: set `FIREBASE_SERVICE_ACCOUNT_JSON` to the full service-account JSON string.
+- Local fallback: set `FIREBASE_CREDENTIALS_PATH` to a local JSON file path (for example `firebase-credentials.json`).
+
+If you use a `.env` file, keep credential files out of version control.
 
 Start the backend server:
 ```bash

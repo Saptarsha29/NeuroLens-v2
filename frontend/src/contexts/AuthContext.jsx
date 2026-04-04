@@ -7,44 +7,47 @@ import {
   signOut,
 } from 'firebase/auth'
 import { auth } from '../firebase'
-import apiClient from '../api/client'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null)
-  const [loading, setLoading] = useState(true) // true until Firebase resolves initial auth state
+  const [loading, setLoading] = useState(true)
   const [emailVerified, setEmailVerified] = useState(false)
 
   useEffect(() => {
-    // MOCK: Pretend we are NOT logged in, so you can see the Sign In / Register pages!
-    setLoading(true)
-    setTimeout(() => {
-      setCurrentUser(null)
-      setEmailVerified(false)
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user)
+      setEmailVerified(!!user?.emailVerified)
       setLoading(false)
-    }, 100)
-    return () => {}
+    })
+
+    return unsubscribe
   }, [])
 
   async function register(name, email, password) {
-    // MOCK: Fake registration
-    const user = { uid: 'mock_uid', email, displayName: name }
-    setCurrentUser(user)
-    setEmailVerified(false)
-    return { user }
+    const credential = await createUserWithEmailAndPassword(auth, email, password)
+    if (name?.trim()) {
+      await updateProfile(credential.user, { displayName: name.trim() })
+    }
+    await credential.user.reload()
+    const refreshed = auth.currentUser || credential.user
+    setCurrentUser(refreshed)
+    setEmailVerified(!!refreshed.emailVerified)
+    return credential
   }
 
   async function login(email, password) {
-    // MOCK: Fake login
-    const user = { uid: 'mock_uid', email, displayName: 'Fake User' }
-    setCurrentUser(user)
-    setEmailVerified(true)
-    return { user }
+    const credential = await signInWithEmailAndPassword(auth, email, password)
+    await credential.user.reload()
+    const refreshed = auth.currentUser || credential.user
+    setCurrentUser(refreshed)
+    setEmailVerified(!!refreshed.emailVerified)
+    return credential
   }
 
   async function logout() {
-    // MOCK: Fake logout
+    await signOut(auth)
     setCurrentUser(null)
     setEmailVerified(false)
   }

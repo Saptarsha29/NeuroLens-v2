@@ -12,6 +12,7 @@ client.interceptors.request.use(async (config) => {
     const token = await user.getIdToken()
     config.headers.Authorization = `Bearer ${token}`
   }
+
   return config
 })
 
