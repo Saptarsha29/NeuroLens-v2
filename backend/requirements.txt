@@ -1,10 +1,13 @@
 fastapi
-uvicorn[standard]
-python-multipart
 firebase-admin
 librosa
-scikit-learn
 numpy
+pandas
+pydantic
+python-dotenv
+python-multipart
+scikit-learn
 scipy
 soundfile
-python-dotenv
+SpeechRecognition
+uvicorn[standard]

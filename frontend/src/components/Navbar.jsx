@@ -11,6 +11,7 @@ export default function Navbar() {
   }
 
   return (
+<<<<<<< Updated upstream
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
       <nav className="w-full max-w-6xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 text-white shadow-2xl rounded-full px-6 py-3">
         <div className="flex items-center justify-between">
@@ -65,5 +66,61 @@ export default function Navbar() {
       </div>
     </nav>
   </div>
+=======
+    <>
+      <nav className="relative bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 shadow-lg shadow-black/20">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight group">
+            <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🧠</span>
+            <span className="bg-gradient-to-r from-cyan-400 to-indigo-400 bg-clip-text text-transparent">
+              NeuroLens
+            </span>
+          </Link>
+
+          {/* Links */}
+          <div className="flex items-center gap-5 text-sm font-medium">
+            <Link to="/tests" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+              Tests
+            </Link>
+
+            {currentUser ? (
+              <>
+                <Link to="/dashboard" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+                  Dashboard
+                </Link>
+                <Link to="/history" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+                  History
+                </Link>
+                <span className="text-slate-500 hidden sm:block text-xs">
+                  {currentUser.displayName || currentUser.email}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="text-slate-400 hover:text-rose-400 px-3 py-1.5 rounded-lg border border-slate-700/50 hover:border-rose-500/30 hover:bg-rose-500/10 transition-all duration-300 text-xs font-semibold tracking-wide"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="btn-primary text-xs px-4 py-2"
+                >
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
+        </div>
+      </nav>
+      {/* Glowing neuron accent line */}
+      <div className="h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-60" />
+    </>
+>>>>>>> Stashed changes
   )
 }
