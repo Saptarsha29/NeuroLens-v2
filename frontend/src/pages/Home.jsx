@@ -5,9 +5,9 @@ export default function Home() {
   const { currentUser } = useAuth()
 
   return (
-    <div className="h-screen w-full bg-white text-slate-900 relative overflow-hidden flex flex-col font-sans">
+    <div className="min-h-screen min-h-[100dvh] w-full bg-white text-slate-900 relative overflow-x-hidden overflow-y-auto flex flex-col font-sans">
       
-      {/* 3D DNA & ABSTRACT PURPLE RIGHT-SIDE GRAPHIC */}
+      {/* ABSTRACT PURPLE RIGHT-SIDE GRAPHIC */}
       <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[60%] pointer-events-none overflow-hidden z-0">
          <div className="absolute right-[-10%] top-[10%] w-[600px] h-[800px] bg-purple-500/20 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-pulse"></div>
          <div className="absolute right-[10%] top-[40%] w-[400px] h-[600px] bg-indigo-500/20 blur-[100px] rounded-full mix-blend-multiply opacity-60"></div>    
@@ -21,7 +21,7 @@ export default function Home() {
       </div>
 
       {/* MAIN TOP SECTION */}
-      <div className="flex-1 max-w-[1600px] mx-auto w-full px-6 md:px-12 lg:px-24 z-10 flex flex-col justify-center pt-20">
+      <div className="flex-1 max-w-[1600px] mx-auto w-full px-6 md:px-12 lg:px-24 z-10 flex flex-col justify-center pt-24 lg:pt-32 pb-8">
         <div className="flex flex-col items-start text-left max-w-xl xl:max-w-2xl mt-4">
           <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-800 mb-6">
             PURPOSE OF NEUROLENS
