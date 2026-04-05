@@ -11,65 +11,9 @@ export default function Navbar() {
   }
 
   return (
-<<<<<<< Updated upstream
-    <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
-      <nav className="w-full max-w-6xl bg-slate-950/80 backdrop-blur-xl border border-slate-800 text-white shadow-2xl rounded-full px-6 py-3">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link to="/tests" className="flex items-center gap-3 font-semibold text-lg tracking-tight hover:opacity-80 transition-opacity">
-            <span className="text-xl">🧠</span>
-            <span className="text-white">NeuroLens</span>
-          </Link>
-
-        {/* Links */}
-        <div className="flex items-center gap-6 text-sm font-medium text-slate-300">
-          {currentUser ? (
-            <>
-              <Link to="/tests" className="hover:text-white transition-colors">
-                Tests
-              </Link>
-              <Link to="/dashboard" className="hover:text-white transition-colors">
-                Dashboard
-              </Link>
-              <Link to="/history" className="hover:text-white transition-colors">
-                History
-              </Link>
-              <span className="text-slate-500 hidden sm:block border-l border-slate-700 pl-6 ml-2">
-                {currentUser.displayName || currentUser.email}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-400 border border-rose-500/20 px-4 py-1.5 rounded-lg transition-colors ml-2"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <div className="flex items-center gap-8 ml-2">
-              <div className="flex items-center gap-6 font-semibold text-slate-200 text-[15px] mr-2">
-                <Link to="/tests" className="hover:text-white transition-colors">
-                  Home
-                </Link>
-                <Link to="#" className="hover:text-white transition-colors">
-                  Docs
-                </Link>
-              </div>
-              <Link
-                to="/register"
-                className="bg-gradient-to-r from-cyan-500 to-indigo-500 hover:from-cyan-400 hover:to-indigo-400 text-white px-5 py-2 text-[15px] font-bold rounded-xl shadow-lg shadow-cyan-500/20 transition-all duration-300"
-              >
-                Register
-              </Link>
-            </div>
-          )}
-        </div>
-      </div>
-    </nav>
-  </div>
-=======
     <>
-      <nav className="relative bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 shadow-lg shadow-black/20">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <nav className="mx-auto max-w-5xl rounded-full bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 shadow-lg shadow-black/20">
+        <div className="px-6 h-16 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight group">
             <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🧠</span>
@@ -79,13 +23,19 @@ export default function Navbar() {
           </Link>
 
           {/* Links */}
-          <div className="flex items-center gap-5 text-sm font-medium">
-            <Link to="/tests" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
-              Tests
+          <div className="flex items-center gap-6 text-sm font-medium">
+            <Link to="/dashboard" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+              Home
+            </Link>
+            <Link to="#" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+              Docs
             </Link>
 
             {currentUser ? (
               <>
+                <Link to="/tests" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
+                  Tests
+                </Link>
                 <Link to="/dashboard" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
                   Dashboard
                 </Link>
@@ -103,24 +53,16 @@ export default function Navbar() {
                 </button>
               </>
             ) : (
-              <>
-                <Link to="/login" className="text-slate-300 hover:text-cyan-400 transition-colors duration-300">
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="btn-primary text-xs px-4 py-2"
-                >
-                  Register
-                </Link>
-              </>
+              <Link
+                to="/register"
+                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs px-5 py-2 rounded-full font-medium transition-all shadow-[0_0_15px_rgba(79,70,229,0.5)]"
+              >
+                Register
+              </Link>
             )}
           </div>
         </div>
       </nav>
-      {/* Glowing neuron accent line */}
-      <div className="h-[2px] bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-60" />
     </>
->>>>>>> Stashed changes
   )
 }

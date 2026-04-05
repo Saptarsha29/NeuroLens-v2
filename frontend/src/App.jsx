@@ -16,12 +16,16 @@ import TestsPage from './tests/TestsPage'
 
 function AppContent() {
   const location = useLocation()
-  const hideNavbar = location.pathname === '/tests'
+  const hideNavbar = location.pathname === '/dashboard' || location.pathname === '/tests'
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {!hideNavbar && <Navbar />}
-      <main className="flex-1">
+    <div className="min-h-screen flex flex-col relative">
+      {!hideNavbar && (
+        <div className="absolute top-0 left-0 right-0 z-50 pt-4">
+          <Navbar />
+        </div>
+      )}
+      <main className={`flex-1 ${!hideNavbar ? 'mt-16' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
@@ -32,9 +36,10 @@ function AppContent() {
 
           {/* Protected routes - require verification */}
           <Route element={<VerificationGuard />}>
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/history" element={<History />} />
           </Route>
+          
+          <Route path="/dashboard" element={<Dashboard />} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />

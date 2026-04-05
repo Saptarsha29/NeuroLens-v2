@@ -20,11 +20,8 @@ export default function Home() {
         <div className="mt-12 flex justify-center gap-6 flex-wrap">
           {!currentUser ? (
             <>
-              <Link to="/tests" className="bg-white text-black hover:bg-slate-200 px-8 py-3.5 rounded-full font-semibold text-[15px] transition-all duration-300">
+              <Link to="/tests" className="bg-white text-black hover:bg-slate-200 px-8 py-3.5 rounded-full font-semibold text-[15px] transition-all duration-300 shadow-[0_0_40px_rgba(255,255,255,0.3)]">
                 Get Started
-              </Link>
-              <Link to="/login" className="bg-slate-950/50 hover:bg-slate-900 border border-slate-800 text-slate-300 px-8 py-3.5 rounded-full font-medium text-[15px] transition-all duration-300">
-                Log In
               </Link>
             </>
           ) : (

@@ -14,6 +14,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!currentUser) {
+      setLoading(false)
+      return
+    }
     async function load() {
       try {
         const [histRes, weekRes] = await Promise.all([
