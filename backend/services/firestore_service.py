@@ -21,11 +21,48 @@ def create_or_update_user(uid: str, email: str, name: str) -> None:
             "name": name,
             "email_verified": False,
             "created_at": firestore.SERVER_TIMESTAMP,
+            "last_login_at": firestore.SERVER_TIMESTAMP,
         },
         merge=True,
     )
     print(f"[firestore_service] Created/updated user profile for {uid}")
 
+def record_manual_login(uid: str) -> bool:
+    """
+    Update last_login_at timestamp.
+    If the previous login was > 90 days ago, force re-verification.
+    Returns: True if they are forced to re-verify, False otherwise.
+    """
+    db = _get_db()
+    user_ref = db.collection("users").document(uid)
+    doc = user_ref.get()
+    
+    needs_verification = False
+    if doc.exists:
+        data = doc.to_dict()
+        last_login_at = data.get("last_login_at")
+        
+        if last_login_at:
+            if hasattr(last_login_at, "timestamp"):
+                last_dt = datetime.fromtimestamp(last_login_at.timestamp(), tz=timezone.utc)
+            elif isinstance(last_login_at, datetime):
+                last_dt = last_login_at
+            else:
+                last_dt = datetime.now(timezone.utc)
+                
+            if last_dt.tzinfo is None:
+                last_dt = last_dt.replace(tzinfo=timezone.utc)
+                
+            days_since = (datetime.now(timezone.utc) - last_dt).days
+            if days_since > 90:
+                needs_verification = True
+                
+    update_data = {"last_login_at": firestore.SERVER_TIMESTAMP}
+    if needs_verification:
+        update_data["email_verified"] = False
+        
+    user_ref.set(update_data, merge=True)
+    return needs_verification
 
 def get_user(uid: str) -> dict | None:
     """Retrieve user profile from Firestore."""

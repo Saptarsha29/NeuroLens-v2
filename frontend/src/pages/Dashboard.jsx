@@ -97,7 +97,7 @@ export default function Dashboard() {
         {/* TOP NAVIGATION */}
         <nav className="bg-white rounded-full px-3 py-2 flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 mb-8 relative z-50">
           <div className="flex items-center gap-6 pl-4">
-            <Link to="/" className="flex items-center justify-center w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full text-xl cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm border border-indigo-100">🧠</Link>
+            <Link to="/dashboard" className="flex items-center justify-center w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full text-xl cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm border border-indigo-100">🧠</Link>
             <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
               <Link to="/tests" className="flex items-center gap-2 hover:text-indigo-600 transition-colors"><CheckList /> Tests</Link>
               <div className="flex items-center gap-2 cursor-pointer hover:text-indigo-600 transition-colors"><LinkIcon /> Education</div>
@@ -151,6 +151,10 @@ export default function Dashboard() {
                          <span className="text-[8px] font-extrabold">{currentUser.displayName ? currentUser.displayName.substring(0, 2).toUpperCase() : 'US'}</span>
                       </div>
                       Profile
+                    </Link>
+                    <Link to="/history" className="w-full text-left px-5 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors flex items-center gap-3 font-bold">
+                      <span className="text-slate-400 text-lg leading-none shrink-0" style={{ paddingLeft: '1px' }}>📋</span>
+                      History
                     </Link>
                     <button className="w-full text-left px-5 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors flex items-center gap-3 font-bold mb-2">
                       <span className="text-slate-400 text-lg leading-none shrink-0">⚙️</span>

@@ -26,7 +26,7 @@ function AppContent() {
           <Navbar />
         </div>
       )}
-      <main className={`flex-1 ${!hideNavbar ? 'mt-16' : ''}`}>
+      <main className={`flex-1 ${!hideNavbar && location.pathname !== '/' ? 'mt-16' : ''}`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

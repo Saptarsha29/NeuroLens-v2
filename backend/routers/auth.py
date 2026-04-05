@@ -123,3 +123,24 @@ async def verification_status(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get verification status",
         )
+
+@router.post("/record_login")
+async def record_login(
+    user: dict = Depends(get_current_user),
+):
+    """
+    Record that the user just logged in manually.
+    If it has been > 90 days since their last login, revoke verification status.
+    """
+    try:
+        force_verify = firestore_service.record_manual_login(user["uid"])
+        return {
+            "success": True,
+            "forced_re_verification": force_verify
+        }
+    except Exception as e:
+        print(f"[auth.record_login] Error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to record login",
+        )
