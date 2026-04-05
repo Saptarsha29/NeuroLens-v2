@@ -13,10 +13,11 @@ import Dashboard from './pages/Dashboard'
 import History from './pages/History'
 import Results from './pages/Results'
 import TestsPage from './tests/TestsPage'
+import Profile from './pages/Profile'
 
 function AppContent() {
   const location = useLocation()
-  const hideNavbar = location.pathname === '/dashboard' || location.pathname === '/tests'
+  const hideNavbar = location.pathname === '/dashboard' || location.pathname === '/tests' || location.pathname === '/profile'
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -40,6 +41,7 @@ function AppContent() {
           </Route>
           
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
 
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
