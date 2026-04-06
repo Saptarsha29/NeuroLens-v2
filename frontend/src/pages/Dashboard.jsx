@@ -5,7 +5,7 @@ import client from '../api/client'
 
 // -- Simple SVG icons --
 const Bell = () => <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-const MapPin = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+const MapPin = (props) => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" {...props}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
 const CheckList = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
 const LinkIcon = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
 const SearchIcon = ({ stroke = "#94a3b8", width = "20" }) => (
@@ -28,16 +28,57 @@ export default function Dashboard() {
   const [weeklyData, setWeeklyData] = useState({ weeks: [], scores: [] })
   const [loading, setLoading] = useState(true)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [selectedLocation, setSelectedLocation] = useState('Detecting location...')
+  const [isLocationOpen, setIsLocationOpen] = useState(false)
+  const [locationLoading, setLocationLoading] = useState(false)
+  const [sliderPosition, setSliderPosition] = useState(50) // 0-100 percent
   const menuRef = useRef(null)
+  const locationRef = useRef(null)
+  const sliderRef = useRef(null)
 
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setIsMenuOpen(false)
       }
+      if (locationRef.current && !locationRef.current.contains(event.target)) {
+        setIsLocationOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  // Detect user's geolocation
+  useEffect(() => {
+    function detectLocation() {
+      if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const { latitude, longitude } = position.coords
+            try {
+              const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+              )
+              const data = await response.json()
+              const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown'
+              const country = data.address?.country || 'Unknown'
+              setSelectedLocation(`${city}, ${country}`)
+            } catch (e) {
+              console.error('Reverse geocoding error:', e)
+              setSelectedLocation('Location detected')
+            }
+            setLocationLoading(false)
+          },
+          (error) => {
+            console.error('Geolocation error:', error)
+            setSelectedLocation('Location access denied')
+            setLocationLoading(false)
+          }
+        )
+      }
+    }
+    detectLocation()
   }, [])
 
   useEffect(() => {
@@ -100,25 +141,10 @@ export default function Dashboard() {
             <Link to="/dashboard" className="flex items-center justify-center w-10 h-10 bg-indigo-50 text-indigo-500 rounded-full text-xl cursor-pointer hover:bg-indigo-100 transition-colors shadow-sm border border-indigo-100">🧠</Link>
             <div className="hidden lg:flex items-center gap-6 text-sm font-semibold text-slate-600">
               <Link to="/tests" className="flex items-center gap-2 hover:text-indigo-600 transition-colors"><CheckList /> Tests</Link>
-              <div className="flex items-center gap-2 cursor-pointer hover:text-indigo-600 transition-colors"><LinkIcon /> Education</div>
             </div>
           </div>
           
-          <div className="hidden md:flex flex-1 max-w-3xl border border-slate-100 rounded-full mx-6 items-center overflow-hidden bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]">
-            <div className="flex-1 flex items-center h-12">
-              <SearchParam text="What type of test?" />
-              <SearchParam text="What body part?" />
-              <SearchParam text="Where?" />
-            </div>
-            <div className="w-14 h-full flex items-center justify-center bg-white border-l border-slate-100 text-slate-400 cursor-pointer hover:bg-slate-50 transition-colors">
-              <SearchIcon />
-            </div>
-          </div>
-
           <div className="flex items-center gap-4 pr-2">
-            <div className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 text-slate-600 hover:bg-slate-100 cursor-pointer border border-slate-100 font-bold transition-colors">
-              +
-            </div>
             <div className="w-12 h-12 flex items-center justify-center rounded-full bg-[#1e2330] text-white shadow-lg shadow-black/10 cursor-pointer hover:scale-105 transition-transform">
               <Bell />
             </div>
@@ -156,20 +182,9 @@ export default function Dashboard() {
                       <span className="text-slate-400 text-lg leading-none shrink-0" style={{ paddingLeft: '1px' }}>📋</span>
                       History
                     </Link>
-                    <button className="w-full text-left px-5 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors flex items-center gap-3 font-bold mb-2">
-                      <span className="text-slate-400 text-lg leading-none shrink-0">⚙️</span>
-                      Settings
-                    </button>
                     
                     <div className="px-5 mb-2"><div className="h-px bg-slate-100 w-full"></div></div>
 
-                    <button className="w-full text-left px-5 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors flex items-center justify-between font-bold">
-                      <div className="flex items-center gap-3">
-                         <span className="text-slate-400 text-lg leading-none shrink-0">❓</span>
-                         Help
-                      </div>
-                      <span className="text-slate-400 font-bold">›</span>
-                    </button>
                     <button onClick={handleLogout} className="w-full text-left px-5 py-2.5 text-sm text-rose-500 hover:bg-rose-50 transition-colors flex items-center gap-3 font-bold">
                       <span className="text-rose-400 text-lg leading-none shrink-0">↪</span>
                       Log out
@@ -187,20 +202,43 @@ export default function Dashboard() {
             <p className="text-sm text-slate-500 font-medium mb-1">Dashboard &rarr; <span className="text-slate-800 font-bold">All Tests</span></p>
             <h1 className="text-4xl font-bold text-slate-900 tracking-tight">My Results</h1>
           </div>
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 md:pb-0 hide-scrollbar scroll-smooth">
+          <div className="flex items-center gap-3 pb-2 md:pb-0">
             <button className="bg-indigo-400 hover:bg-indigo-500 transition-colors text-white px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-lg shadow-indigo-300/50 whitespace-nowrap">
               Past Result
               <span className="w-6 h-6 rounded-full bg-white text-indigo-500 flex items-center justify-center"><LinkIcon /></span>
             </button>
-            <button className="bg-white hover:bg-slate-50 transition-colors text-slate-700 px-5 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm border border-slate-200 whitespace-nowrap focus:ring-2 focus:ring-slate-100">
-              DNA <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-            </button>
-            <button className="bg-white hover:bg-slate-50 transition-colors text-slate-700 px-5 py-3 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm border border-slate-200 whitespace-nowrap focus:ring-2 focus:ring-slate-100">
-              <MapPin /> Atlanta City, USA <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"></path></svg>
-            </button>
-            <button className="bg-slate-800 hover:bg-slate-900 text-white rounded-full w-11 h-11 flex items-center justify-center shadow-lg transition-colors border border-slate-700">
-               <span className="opacity-80">▣</span>
-            </button>
+            <div className="relative" ref={locationRef}>
+              <button 
+                onClick={() => {
+                  setLocationLoading(true)
+                  navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                      const { latitude, longitude } = position.coords
+                      try {
+                        const response = await fetch(
+                          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        )
+                        const data = await response.json()
+                        const city = data.address?.city || data.address?.town || data.address?.village || 'Unknown'
+                        const country = data.address?.country || 'Unknown'
+                        setSelectedLocation(`${city}, ${country}`)
+                      } catch (e) {
+                        console.error('Reverse geocoding error:', e)
+                      }
+                      setLocationLoading(false)
+                    },
+                    (error) => {
+                      console.error('Geolocation error:', error)
+                      setSelectedLocation('Location access denied')
+                      setLocationLoading(false)
+                    }
+                  )
+                }}
+                className="bg-white hover:bg-slate-50 transition-colors text-slate-700 px-4 py-3 rounded-full text-sm font-bold flex items-center gap-2 shadow-sm border border-slate-200 focus:ring-2 focus:ring-slate-100"
+              >
+                <MapPin /> {locationLoading ? 'Updating...' : selectedLocation}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -336,20 +374,39 @@ export default function Dashboard() {
                 </div>
                 <p className="text-sm text-slate-400 mb-10 font-medium leading-relaxed pr-4">"Perfect wellness metrics seen on patient's neurological tests"</p>
                 
-                {/* Custom thick slider UI */}
-                <div className="relative w-full h-[4px] bg-slate-100 rounded-full mb-10">
-                   <div className="absolute left-[30%] text-indigo-500 -mt-[9px]">
-                      <div className="w-5 h-5 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)] border-[4px] border-white cursor-pointer hover:scale-110 transition-transform"></div>
+                {/* Interactive slider UI */}
+                <div 
+                  ref={sliderRef}
+                  className="relative w-full h-[4px] bg-slate-100 rounded-full mb-10 cursor-pointer group"
+                  onMouseDown={(e) => {
+                    const rect = sliderRef.current.getBoundingClientRect()
+                    const percent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+                    setSliderPosition(percent)
+                  }}
+                  onTouchStart={(e) => {
+                    const rect = sliderRef.current.getBoundingClientRect()
+                    const percent = Math.max(0, Math.min(100, ((e.touches[0].clientX - rect.left) / rect.width) * 100))
+                    setSliderPosition(percent)
+                  }}
+                >
+                   <div 
+                     className="absolute text-indigo-500 -mt-[9px] transition-all"
+                     style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+                   >
+                      <div className="w-5 h-5 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)] border-[4px] border-white cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"></div>
                    </div>
                 </div>
 
                 <div className="flex justify-between items-center gap-3">
-                   <div className="w-20 h-20 bg-[#0e1217] rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl shadow-slate-300 border border-slate-800">🎙️</div>
-                   <div className="w-20 h-20 bg-[#0e1217] rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl shadow-slate-300 border border-slate-800 relative z-10 scale-110">
-                      ✏️ 
-                      <div className="absolute inset-[-2px] border-[2px] border-indigo-400 rounded-[1.4rem] opacity-50"></div>
-                   </div>
-                   <div className="w-20 h-20 bg-[#0e1217] rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl shadow-slate-300 border border-slate-800 opacity-80">👆</div>
+                   <div className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all ${
+                     sliderPosition < 33 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
+                   }`}>🎙️</div>
+                   <div className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all ${
+                     sliderPosition >= 33 && sliderPosition < 66 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
+                   }`}>✏️</div>
+                   <div className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all ${
+                     sliderPosition >= 66 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
+                   }`}>👆</div>
                 </div>
               </div>
 
@@ -404,29 +461,8 @@ export default function Dashboard() {
 
             </div>
 
-             {/* ROW 3: SCORES BAR CHART */}
-             <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-               <div className="flex items-center justify-between mb-10 px-2">
-                 <h3 className="font-bold text-slate-800 text-xl tracking-tight">Test Score Overview</h3>
-                 <span className="bg-slate-800 text-white font-bold rounded-full px-3 py-1 text-[10px] uppercase tracking-wider shadow-sm">90-100 Pts</span>
-               </div>
-               <div className="h-56 w-full group relative mb-2 sm:pl-10">
-                 <div className="absolute inset-y-0 left-8 sm:left-10 right-0 flex items-end justify-between gap-1 sm:gap-2 pb-[40px] pt-4 px-2 sm:px-4 border-b border-slate-100">
-                   {(chartData.length > 0 ? chartData : [{score: 30}, {score: 50}, {score: 40}, {score: 70}, {score: 95}]).map((d, i) => (
-                     <div key={i} className="w-[12px] md:w-[18px] lg:w-[24px] bg-slate-50/50 border border-slate-100/50 rounded-t-sm h-[90%] flex flex-col justify-end transition-colors cursor-pointer relative items-center">
-                        <div className="w-full rounded-t-sm bg-indigo-400/90 transition-all hover:bg-indigo-500 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4)] relative z-10" style={{height: `${d.score}%`}}></div>
-                     </div>
-                   ))}
-                 </div>
-                 
-                 <div className="absolute left-8 sm:left-12 right-2 sm:right-6 top-[45%] -translate-y-1/2 border-t border-dashed border-slate-200 pointer-events-none z-0"></div>
-
-                 <div className="absolute bottom-0 left-8 sm:left-10 right-0 pt-4 flex justify-center text-[9px] sm:text-[10px] font-extrabold text-slate-400 uppercase tracking-widest pointer-events-none">Oxygen saturation / Score quality</div>
-                 <div className="absolute left-0 top-0 bottom-[40px] text-[9px] sm:text-[10px] text-slate-300 uppercase tracking-[0.4em] font-extrabold pb-6 flex items-end pointer-events-none sm:pr-4" style={{writingMode: 'vertical-rl', transform: 'rotate(180deg)'}}>Metric score</div>
-               </div>
-             </div>
           </div>
-          
+
           {/* RIGHT NARROW COLUMN */}
           <div className="flex flex-col gap-6 overflow-y-auto pr-2 hide-scrollbar">
             
