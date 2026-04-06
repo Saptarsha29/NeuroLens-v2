@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+const primaryBtnClass = "border border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white px-8 py-3.5 rounded-full font-semibold text-xs sm:text-sm tracking-widest transition-all uppercase whitespace-nowrap text-center";
+const secondaryBtnClass = "bg-[#0b0c10] text-white hover:bg-black px-8 py-3.5 rounded-full font-semibold text-xs sm:text-sm tracking-widest transition-all shadow-lg uppercase whitespace-nowrap text-center";
+
 export default function Home() {
   const { currentUser } = useAuth()
 
@@ -8,9 +11,9 @@ export default function Home() {
     <div className="min-h-screen min-h-[100dvh] w-full bg-white text-slate-900 relative overflow-x-hidden overflow-y-auto flex flex-col font-sans">
       
       {/* ABSTRACT PURPLE RIGHT-SIDE GRAPHIC */}
-      <div className="absolute right-0 top-0 bottom-0 w-full lg:w-[60%] pointer-events-none overflow-hidden z-0">
-         <div className="absolute right-[-10%] top-[10%] w-[600px] h-[800px] bg-purple-500/20 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-pulse"></div>
-         <div className="absolute right-[10%] top-[40%] w-[400px] h-[600px] bg-indigo-500/20 blur-[100px] rounded-full mix-blend-multiply opacity-60"></div>    
+      <div aria-hidden="true" className="absolute right-0 top-0 bottom-0 w-full lg:w-[60%] pointer-events-none overflow-hidden z-0">
+         <div className="absolute right-[-10%] top-[10%] w-[600px] h-[800px] bg-purple-500/20 blur-[120px] rounded-full mix-blend-multiply opacity-70 animate-pulse transform-gpu"></div>
+         <div className="absolute right-[10%] top-[40%] w-[400px] h-[600px] bg-indigo-500/20 blur-[100px] rounded-full mix-blend-multiply opacity-60 transform-gpu"></div>    
 
 
 

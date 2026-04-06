@@ -16,9 +16,9 @@ function drawGuide(ctx, width, height) {
   const centerY = height / 2
 
   ctx.save()
-  ctx.strokeStyle = '#e0e0e0'
-  ctx.lineWidth = 1
-  ctx.setLineDash([5, 5])
+  ctx.strokeStyle = '#bae6fd' // Light cyan guides instead of ash grey
+  ctx.lineWidth = 1.5
+  ctx.setLineDash([6, 6])
   ctx.beginPath()
   for (let angle = 0; angle < 6 * Math.PI; angle += 0.1) {
     const radius = angle * 10
@@ -50,8 +50,8 @@ export default function SpiralTest({ onComplete }) {
   useEffect(() => {
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
-    ctx.strokeStyle = '#2c3e50'
-    ctx.lineWidth = 2
+    ctx.strokeStyle = '#0284c7' // Bright professional blue for the drawing
+    ctx.lineWidth = 3
     ctx.lineCap = 'round'
     ctx.lineJoin = 'round'
     drawGuide(ctx, canvas.width, canvas.height)
@@ -59,10 +59,21 @@ export default function SpiralTest({ onComplete }) {
 
   function getPos(e, canvas) {
     const rect = canvas.getBoundingClientRect()
-    if (e.touches) {
-      return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }
+    const scaleX = canvas.width / rect.width
+    const scaleY = canvas.height / rect.height
+    
+    let clientX = e.clientX
+    let clientY = e.clientY
+    
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX
+      clientY = e.touches[0].clientY
     }
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    
+    return { 
+      x: (clientX - rect.left) * scaleX, 
+      y: (clientY - rect.top) * scaleY 
+    }
   }
 
   function handleStart(e) {
@@ -136,56 +147,59 @@ export default function SpiralTest({ onComplete }) {
   }
 
   return (
-    <div className="card">
-      <h2 className="text-lg font-semibold text-slate-100 mb-1">✏️ Spiral Drawing Test</h2>
-      <p className="text-sm text-slate-400 mb-4">
-        Trace over the dashed spiral guide from the center outward. Try to follow it as smoothly as
-        possible.
-      </p>
+    <div className="h-full flex flex-col pt-4 pb-8 pl-[4%]">
+      <div className="flex-1 relative w-full flex justify-center items-center">
+        <div className="absolute inset-0 bg-white/40 rounded-[3rem] scale-[0.98] -translate-y-4"></div>
+        <div className="absolute inset-0 bg-[#f8fbff]/60 rounded-[3rem] scale-[0.95] -translate-y-8 blur-sm"></div>
+        
+        <div className="relative w-full h-full max-h-[650px] bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(2,30,45,0.05)] border border-[#eaf4fa] flex flex-col justify-center items-center p-8 px-6 lg:px-16 text-center">
+          
+          <h2 className="text-[#03344b] text-2xl font-bold mb-4">Spiral Drawing Canvas</h2>
 
-      <canvas
-        ref={canvasRef}
-        width={500}
-        height={500}
-        className="border border-slate-700/50 rounded-lg cursor-crosshair touch-none w-full max-w-lg"
-        onMouseDown={handleStart}
-        onMouseMove={handleMove}
-        onMouseUp={handleStop}
-        onMouseOut={handleStop}
-        onTouchStart={handleStart}
-        onTouchMove={handleMove}
-        onTouchEnd={handleStop}
-      />
+          <div className="w-full max-w-[400px] flex justify-center py-2 bg-white shadow-[0_4px_25px_rgba(14,165,233,0.1)] rounded-[2rem] border-2 border-cyan-100/50 overflow-hidden relative">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(186,230,253,0.1)_0%,transparent_70%)] pointer-events-none"></div>
+            <canvas
+              ref={canvasRef}
+              width={500}
+              height={500}
+              className="cursor-crosshair touch-none w-full max-w-[400px] object-contain rounded-2xl relative z-10"
+              onMouseDown={handleStart}
+              onMouseMove={handleMove}
+              onMouseUp={handleStop}
+              onMouseOut={handleStop}
+              onTouchStart={handleStart}
+              onTouchMove={handleMove}
+              onTouchEnd={handleStop}
+            />
+          </div>
 
-      <div className="flex gap-3 mt-4">
-        <button onClick={clearCanvas} className="btn-secondary" disabled={status === 'processing'}>
-          Clear
-        </button>
-        <button
-          onClick={submit}
-          className="btn-primary"
-          disabled={status === 'processing' || status === 'done'}
-        >
-          {status === 'processing' ? '⏳ Analysing…' : 'Submit Drawing'}
-        </button>
-      </div>
+          <div className="flex gap-4 mt-8">
+            <button onClick={clearCanvas} className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-8 py-3 rounded-full font-bold shadow-sm disabled:opacity-50 transition-all text-sm uppercase tracking-widest" disabled={status === 'processing'}>
+              Clear
+            </button>
+            <button
+              onClick={submit}
+              className="bg-[#03344b] hover:bg-[#021f2d] text-white px-8 py-3 rounded-full font-bold shadow-lg disabled:opacity-50 transition-all text-sm uppercase tracking-widest flex items-center gap-2"
+              disabled={status === 'processing' || status === 'done'}
+            >
+              {status === 'processing' && <span className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></span>}
+              {status === 'processing' ? 'Analysing...' : 'Submit Drawing'}
+            </button>
+          </div>
 
-      {error && <p className="text-sm text-rose-400 mt-3">❌ {error}</p>}
+          {error && <p className="text-sm font-semibold text-rose-500 bg-rose-50 px-4 py-2 rounded-xl mt-4">❌ {error}</p>}
 
-      {status === 'done' && score !== null && (
-        <div className="mt-4 p-4 bg-emerald-900/30 border border-emerald-500/20 rounded-lg">
-          <p className="font-semibold text-emerald-400">✅ Spiral Analysis Complete</p>
-          <p className="text-2xl font-bold text-emerald-400 mt-1">{score.toFixed(1)} / 100</p>
-          <p className="text-sm text-slate-400 mt-1">{scoreLabel(score)}</p>
-          {metrics && (
-            <div className="flex gap-4 mt-2 text-xs text-slate-500">
-              <span>Smoothness: {metrics.path_smoothness.toFixed(2)}</span>
-              <span>Direction changes: {metrics.direction_changes}</span>
-              <span>Time: {(metrics.total_time / 1000).toFixed(1)}s</span>
+          {status === 'done' && score !== null && (
+             <div className="mt-8 p-6 bg-emerald-50 rounded-2xl border border-emerald-100 w-full max-w-sm">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center mb-2 mx-auto">
+                <span className="text-emerald-500 text-2xl">✅</span>
+              </div>
+              <p className="text-4xl font-extrabold text-[#03344b]">{score.toFixed(1)} <span className="text-xl text-slate-400 font-medium">/ 100</span></p>
+              <p className="text-[#03344b] font-medium text-[0.65rem] mt-2 uppercase tracking-widest opacity-60">Result</p>
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

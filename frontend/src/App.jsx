@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
 import { VerificationProvider } from './contexts/VerificationContext'
@@ -5,19 +6,33 @@ import Navbar from './components/Navbar'
 import ProtectedRoute from './components/ProtectedRoute'
 import VerificationGuard from './components/VerificationGuard'
 
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import EmailVerification from './pages/EmailVerification'
-import Dashboard from './pages/Dashboard'
-import History from './pages/History'
-import Results from './pages/Results'
-import TestsPage from './tests/TestsPage'
-import Profile from './pages/Profile'
+// Define route constants to avoid magic strings
+export const ROUTES = {
+  HOME: '/',
+  LOGIN: '/login',
+  REGISTER: '/register',
+  VERIFY_EMAIL: '/verify-email',
+  TESTS: '/tests',
+  RESULTS: '/results',
+  HISTORY: '/history',
+  DASHBOARD: '/dashboard',
+  PROFILE: '/profile'
+}
+
+// Lazy load page components for better performance
+const Home = lazy(() => import('./pages/Home'))
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const EmailVerification = lazy(() => import('./pages/EmailVerification'))
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const History = lazy(() => import('./pages/History'))
+const Results = lazy(() => import('./pages/Results'))
+const TestsPage = lazy(() => import('./tests/TestsPage'))
+const Profile = lazy(() => import('./pages/Profile'))
 
 function AppContent() {
   const location = useLocation()
-  const hideNavbar = location.pathname === '/dashboard' || location.pathname === '/tests' || location.pathname === '/profile'
+  const hideNavbar = [ROUTES.DASHBOARD, ROUTES.TESTS, ROUTES.PROFILE].includes(location.pathname)
 
   return (
     <div className="min-h-screen flex flex-col relative">
@@ -26,26 +41,36 @@ function AppContent() {
           <Navbar />
         </div>
       )}
-      <main className={`flex-1 ${!hideNavbar && location.pathname !== '/' ? 'mt-16' : ''}`}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/verify-email" element={<EmailVerification />} />
-          <Route path="/tests" element={<TestsPage />} />
-          <Route path="/results" element={<Results />} />
+      <main className={`flex-1 ${!hideNavbar && location.pathname !== ROUTES.HOME ? 'mt-16' : ''}`}>
+        <Suspense fallback={
+          <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-medium">
+            Loading...
+          </div>
+        }>
+          <Routes>
+            {/* Public Routes */}
+            <Route path={ROUTES.HOME} element={<Home />} />
+            <Route path={ROUTES.LOGIN} element={<Login />} />
+            <Route path={ROUTES.REGISTER} element={<Register />} />
+            <Route path={ROUTES.VERIFY_EMAIL} element={<EmailVerification />} />
+            <Route path={ROUTES.TESTS} element={<TestsPage />} />
+            <Route path={ROUTES.RESULTS} element={<Results />} />
 
-          {/* Protected routes - require verification */}
-          <Route element={<VerificationGuard />}>
-            <Route path="/history" element={<History />} />
-          </Route>
-          
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
+            {/* Protected routes - require authentication */}
+            <Route element={<ProtectedRoute />}>
+              <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+              <Route path={ROUTES.PROFILE} element={<Profile />} />
+            </Route>
 
-          {/* Catch-all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            {/* Verification Guard routes - require specific verification/roles */}
+            <Route element={<VerificationGuard />}>
+              <Route path={ROUTES.HISTORY} element={<History />} />
+            </Route>
+
+            {/* Catch-all */}
+            <Route path="*" element={<Navigate to={ROUTES.HOME} replace />} />
+          </Routes>
+        </Suspense>
       </main>
     </div>
   )

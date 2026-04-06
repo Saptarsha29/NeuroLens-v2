@@ -142,48 +142,55 @@ export default function VoiceTest({ onComplete }) {
   }
 
   return (
-    <div className="card">
-      <h2 className="text-lg font-semibold text-slate-100 mb-1">🎙️ Voice Stability Test</h2>
-      <p className="text-sm text-slate-400 mb-4">
-        Click <strong>Start Recording</strong>, say <em>"I'M FULLY FIT"</em> in a steady tone for 3 seconds,
-        then click <strong>Stop Recording</strong>.
-      </p>
+    <div className="h-full flex flex-col pt-4 pb-8 pl-[4%]">
+      <div className="flex-1 relative w-full flex justify-center items-center">
+        <div className="absolute inset-0 bg-white/40 rounded-[3rem] scale-[0.98] -translate-y-4"></div>
+        <div className="absolute inset-0 bg-[#f8fbff]/60 rounded-[3rem] scale-[0.95] -translate-y-8 blur-sm"></div>
+        
+        <div className="relative w-full h-full max-h-[600px] bg-white rounded-[3rem] shadow-[0_20px_60px_-15px_rgba(2,30,45,0.05)] border border-[#eaf4fa] flex flex-col justify-center items-center p-8 px-6 lg:px-16 text-center">
+          
+          <h2 className="text-[#03344b] text-2xl font-bold mb-8">Voice Stability Recording</h2>
 
-      <div className="flex gap-3 mb-4">
-        <button
-          onClick={startRecording}
-          disabled={status === 'recording' || status === 'processing' || status === 'done'}
-          className="btn-primary"
-        >
-          🎙️ Start Recording
-        </button>
-        <button
-          onClick={stopRecording}
-          disabled={status !== 'recording'}
-          className="btn-secondary"
-        >
-          ⏹️ Stop Recording
-        </button>
-      </div>
-
-      {status === 'recording' && (
-        <p className="text-sm text-rose-400 animate-pulse">🔴 Recording… speak steadily</p>
-      )}
-      {status === 'processing' && (
-        <p className="text-sm text-cyan-400">⏳ Processing audio…</p>
-      )}
-      {error && <p className="text-sm text-rose-400">❌ {error}</p>}
-
-      {status === 'done' && score !== null && (
-        <div className="mt-4 p-4 bg-emerald-900/30 border border-emerald-500/20 rounded-lg">
-          <p className="font-semibold text-emerald-400">✅ Voice Analysis Complete</p>
-          <div className="flex justify-between items-baseline mt-1">
-            <p className="text-2xl font-bold text-emerald-400">{score.toFixed(1)} / 100</p>
-            <p className="text-xs text-slate-400">AI heard: "{transcription || '...'}"</p>
+          <div className="flex gap-4 mb-8">
+            <button
+              onClick={startRecording}
+              disabled={status === 'recording' || status === 'processing' || status === 'done'}
+              className="bg-[#03344b] hover:bg-[#021f2d] text-white px-8 py-4 rounded-full font-bold shadow-lg disabled:opacity-50 transition-all"
+            >
+              🎙️ Start Recording
+            </button>
+            <button
+              onClick={stopRecording}
+              disabled={status !== 'recording'}
+              className="bg-rose-100 hover:bg-rose-200 text-rose-800 px-8 py-4 rounded-full font-bold transition-all disabled:opacity-50"
+            >
+              ⏹️ Stop Recording
+            </button>
           </div>
-          <p className="text-sm text-slate-400 mt-2">{scoreLabel(score)}</p>
+
+          {status === 'recording' && (
+            <div className="flex flex-col items-center gap-2">
+              <span className="w-4 h-4 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.6)]"></span>
+              <p className="text-sm text-slate-500 font-bold uppercase tracking-widest mt-2">Recording...</p>
+            </div>
+          )}
+          {status === 'processing' && (
+            <p className="text-sm text-[#7fb8c9] font-bold uppercase tracking-widest animate-pulse">⏳ Processing audio...</p>
+          )}
+          {error && <p className="text-sm font-semibold text-rose-500 bg-rose-50 px-4 py-2 rounded-xl mt-4">❌ {error}</p>}
+
+          {status === 'done' && score !== null && (
+            <div className="mt-8 p-6 bg-emerald-50 rounded-2xl border border-emerald-100 w-full max-w-sm">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-4 mx-auto">
+                <span className="text-emerald-500 text-3xl">✅</span>
+              </div>
+              <p className="text-4xl font-extrabold text-[#03344b]">{score.toFixed(1)} <span className="text-xl text-slate-400 font-medium">/ 100</span></p>
+              <p className="text-[#03344b] font-medium text-xs mt-3 uppercase tracking-widest opacity-60">AI Heard: "{transcription || '...'}"</p>
+              <p className="text-sm text-slate-500 mt-4 leading-relaxed font-medium">{scoreLabel(score)}</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }
