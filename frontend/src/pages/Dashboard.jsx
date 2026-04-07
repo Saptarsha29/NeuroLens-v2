@@ -258,17 +258,17 @@ export default function Dashboard() {
                   <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:bg-slate-200 transition-colors cursor-pointer border border-white/5 font-bold pb-2 text-[18px]">...</div>
                 </div>
                 <div className="bg-white text-black text-[11px] font-bold px-3 py-1.5 rounded-full self-start mt-4 z-10 relative flex items-center gap-1 shadow-sm">
-                  <span className="text-slate-400 text-sm leading-none font-normal">↗</span> Heart
+                  <span className="text-slate-400 text-sm leading-none font-normal">↗</span> Brain
                 </div>
-                
+
                 <div className="absolute inset-0 flex items-center justify-center opacity-90 pointer-events-none mt-4">
                   <div className="w-48 h-48 bg-[#38bdf8]/10 blur-3xl absolute rounded-full"></div>
-                  <span 
-                    className="text-[160px] filter animate-pulse" 
-                    style={{ 
-                      filter: 'sepia(1) hue-rotate(185deg) saturate(4.5) brightness(1.1) drop-shadow(0 0 25px rgba(56,189,248,0.8))' 
+                  <span
+                    className="text-[160px] filter animate-pulse"
+                    style={{
+                      filter: 'sepia(1) hue-rotate(185deg) saturate(4.5) brightness(1.1) drop-shadow(0 0 25px rgba(56,189,248,0.8))'
                     }}>
-                    🫀
+                    🧠
                   </span>
                 </div>
 
@@ -282,8 +282,16 @@ export default function Dashboard() {
                       <div className="w-3.5 h-3.5 rounded-full bg-slate-500/50"></div>
                    </div>
                    <div className="text-right">
-                     <p className="text-[11px] text-slate-300 font-medium tracking-wide mb-[-2px]">Pulse Rate</p>
-                     <p className="text-5xl font-light tracking-tighter text-white">60<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">/100 BMP</span></p>
+                     <p className="text-[11px] text-slate-300 font-medium tracking-wide mb-1">Latest Scores</p>
+                     {latest ? (
+                       <div className="flex flex-col gap-0.5 items-end">
+                         <p className="text-xl font-light tracking-tighter text-white leading-none">V: <span className="font-bold">{latest.voice_score}</span><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">%</span></p>
+                         <p className="text-xl font-light tracking-tighter text-white leading-none">S: <span className="font-bold">{latest.spiral_score}</span><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">%</span></p>
+                         <p className="text-xl font-light tracking-tighter text-white leading-none">T: <span className="font-bold">{latest.tap_score}</span><span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-0.5">%</span></p>
+                       </div>
+                     ) : (
+                        <p className="text-3xl font-light tracking-tighter text-white">--<span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">%</span></p>
+                     )}
                    </div>
                 </div>
               </div>
@@ -372,61 +380,66 @@ export default function Dashboard() {
                    <h3 className="font-bold text-slate-800 text-xl leading-tight tracking-tight">Neurology tests<br/>Explanation</h3>
                    <span className="text-slate-300 hover:text-slate-500 cursor-pointer font-bold tracking-widest leading-none -mt-1">...</span>
                 </div>
-                <p className="text-sm text-slate-400 mb-10 font-medium leading-relaxed pr-4">"Perfect wellness metrics seen on patient's neurological tests"</p>
-                
-                {/* Interactive slider UI */}
-                <div 
-                  ref={sliderRef}
-                  className="relative w-full h-[4px] bg-slate-100 rounded-full mb-10 cursor-pointer group"
-                  onMouseDown={(e) => {
-                    const rect = sliderRef.current.getBoundingClientRect()
-                    const percent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
-                    setSliderPosition(percent)
-                  }}
-                  onTouchStart={(e) => {
-                    const rect = sliderRef.current.getBoundingClientRect()
-                    const percent = Math.max(0, Math.min(100, ((e.touches[0].clientX - rect.left) / rect.width) * 100))
-                    setSliderPosition(percent)
-                  }}
-                >
-                   <div 
-                     className="absolute text-indigo-500 -mt-[9px] transition-all"
-                     style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
-                   >
-                      <div className="w-5 h-5 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)] border-[4px] border-white cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"></div>
+                  <p className="text-sm text-slate-500 mb-10 font-medium leading-relaxed pr-4">
+                    {sliderPosition < 33 
+                      ? "The Voice test measures micro-tremors, jitter, and shimmer in sustained phonation to detect early signs of vocal cord rigidity."
+                      : sliderPosition >= 66 
+                        ? "The Finger Tapping test evaluates motor rhythm, latent response, and speed to measure fine motor impairment and bradykinesia."
+                        : "The Spiral test analyzes drawing precision, visuospatial coordination, and hand tremors by tracking drawing speed, pressure, and deviations."}
+                  </p>
+
+                  {/* Interactive slider UI */}
+                  <div
+                    ref={sliderRef}
+                    className="relative w-full h-[4px] bg-slate-100 rounded-full mb-10 cursor-pointer group"
+                    onMouseDown={(e) => {
+                      const rect = sliderRef.current.getBoundingClientRect()    
+                      const percent = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100))
+                      setSliderPosition(percent)
+                    }}
+                    onTouchStart={(e) => {
+                      const rect = sliderRef.current.getBoundingClientRect()    
+                      const percent = Math.max(0, Math.min(100, ((e.touches[0].clientX - rect.left) / rect.width) * 100))
+                      setSliderPosition(percent)
+                    }}
+                  >
+                     <div
+                       className="absolute text-indigo-500 -mt-[9px] transition-all"
+                       style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+                     >
+                        <div className="w-5 h-5 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.6)] border-[4px] border-white cursor-grab active:cursor-grabbing hover:scale-110 transition-transform"></div>
+                     </div>
+                  </div>
+
+                  <div className="flex justify-between items-center gap-3">     
+                     <div
+                       onClick={() => setSliderPosition(15)}
+                       className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all cursor-pointer hover:opacity-100 ${
+                         sliderPosition < 33 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
+                       }`}>🎙️</div>
+                     <div
+                       onClick={() => setSliderPosition(50)}
+                       className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all cursor-pointer hover:opacity-100 ${
+                         sliderPosition >= 33 && sliderPosition < 66 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
+                       }`}>✏️</div>
+                     <div
+                       onClick={() => setSliderPosition(85)}
+                       className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all cursor-pointer hover:opacity-100 ${
+                         sliderPosition >= 66 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
+                       }`}>👆</div>
+                  </div>
+                </div>
+
+                {/* TIMELINE LIST */}
+                <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 relative">
+                   <div className="flex items-center justify-between mb-8 z-10 relative">
+                     <h3 className="font-bold text-slate-800 text-xl tracking-tight">Results</h3>
+                     <Link to="/history" className="text-xs font-bold text-indigo-500 hover:text-indigo-600 bg-indigo-50 px-3 py-1.5 rounded-full transition-colors">Get Report Files</Link>
                    </div>
-                </div>
-
-                <div className="flex justify-between items-center gap-3">
-                   <div className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all ${
-                     sliderPosition < 33 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
-                   }`}>🎙️</div>
-                   <div className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all ${
-                     sliderPosition >= 33 && sliderPosition < 66 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
-                   }`}>✏️</div>
-                   <div className={`w-20 h-20 rounded-[1.25rem] flex items-center justify-center text-3xl shadow-xl border transition-all ${
-                     sliderPosition >= 66 ? 'bg-[#0e1217] border-slate-800 shadow-slate-300 scale-110 ring-2 ring-indigo-400' : 'bg-[#0e1217] border-slate-800 shadow-slate-300 opacity-60'
-                   }`}>👆</div>
-                </div>
-              </div>
-
-              {/* TIMELINE LIST */}
-              <div className="bg-white rounded-[2rem] p-6 md:p-8 shadow-sm border border-slate-100 relative">
-                 <div className="flex items-center justify-between mb-8 z-10 relative">
-                    <h3 className="font-bold text-slate-800 text-2xl tracking-tight flex items-center gap-3">
-                      Results 
-                      <span className="text-[10px] font-bold bg-slate-800 text-white rounded-full px-2 py-0.5 tracking-wider shadow-sm">05</span> 
-                      <span className="text-[10px] font-bold bg-slate-100 text-slate-600 rounded-full px-3 py-1 cursor-pointer hover:bg-slate-200 transition-colors uppercase tracking-wider">Detailed results ↗</span>
-                    </h3>
-                    <Link to="/history" className="flex items-center gap-2 bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-colors rounded-full px-5 py-2.5 font-bold text-slate-600 text-sm shadow-sm group">
-                      <span className="w-5 h-5 rounded-full bg-slate-800 text-white flex items-center justify-center text-[10px] group-hover:bg-indigo-500 transition-colors">↓</span> Get Report Files
-                    </Link>
-                 </div>
-
-                 <div className="space-y-3 relative mx-4 mb-8">
+                   <div className="relative">
                     {/* The gray vertical line */}
                     <div className="absolute left-[50%] top-0 bottom-0 w-[2px] bg-slate-50 -z-0"></div>
-                    
+
                     {['Voice', 'Spiral', 'Tap'].map((test, idx) => (
                       <div key={idx} className="flex items-center gap-2 py-1.5 relative z-10 group">
                          <div className="w-[50%] flex items-center bg-slate-50/80 hover:bg-slate-100 transition-colors rounded-full h-12 px-6 border border-slate-100/50">
@@ -554,39 +567,7 @@ export default function Dashboard() {
             </div>
 
             {/* MOCK CHAT BOT COMPONENT */}
-            <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 min-h-[16rem] flex flex-col hover:shadow-md transition-shadow">
-               <div className="flex items-center gap-3 border-b border-slate-100 pb-4 mb-4">
-                  <div className="relative">
-                     <div className="w-8 h-8 rounded-full shadow-sm border border-white bg-slate-200"></div>
-                     <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full"></div>
-                  </div>
-                  <h3 className="font-bold text-slate-800 text-sm tracking-tight">Sarah Alex</h3>
-                  <span className="ml-auto text-slate-300 hover:text-slate-500 cursor-pointer font-bold tracking-widest leading-none">...</span>
-               </div>
-               
-               <div className="flex-1 overflow-y-auto pr-2 space-y-5 hide-scrollbar">
-                 <div className="flex items-start gap-3 flex-row-reverse">
-                   <div className="text-right">
-                      <div className="bg-slate-50 border border-slate-100 rounded-[1.25rem] rounded-tr-sm p-3.5 text-[11px] font-bold text-slate-500 leading-relaxed shadow-sm">
-                        How can I get prepare for the Voice test in the Clinic?
-                      </div>
-                   </div>
-                 </div>
-                 <div className="flex items-start gap-3">
-                   <div className="w-6 h-6 rounded-full bg-slate-200 shrink-0 shadow-sm border border-white mt-1"></div>
-                   <div>
-                      <div className="bg-indigo-50 text-left border border-indigo-100 rounded-[1.25rem] rounded-tl-sm p-3.5 text-[11px] font-bold text-slate-600 leading-relaxed shadow-sm">
-                        Please make sure you are in a quiet environment, avoid loud background noise prior to testing.
-                      </div>
-                   </div>
-                 </div>
-               </div>
-               
-               <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-slate-400 text-[11px] font-bold px-2 relative group focus-within:text-slate-700">
-                 <input type="text" placeholder="Type here...." className="bg-transparent border-0 outline-none w-full placeholder-slate-300 pr-10 tracking-wide" />
-                 <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" className="absolute right-2 cursor-pointer hover:text-indigo-500 transition-colors"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
-               </div>
-            </div>
+            <ChatBot />
 
           </div>
         </div>
@@ -594,4 +575,113 @@ export default function Dashboard() {
       </div>
     </div>
   )
+}
+
+function ChatBot() {
+  const [messages, setMessages] = useState([
+    { sender: 'user', text: 'How can I get prepare for the Voice test in the Clinic?' },
+    { sender: 'bot', text: 'Please make sure you are in a quiet environment, avoid loud background noise prior to testing.' }
+  ]);
+  const [inputValue, setInputValue] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+
+    const newMessages = [...messages, { sender: 'user', text: inputValue }];
+    setMessages(newMessages);
+    const userMsg = inputValue;
+    setInputValue('');
+
+    try {
+      // Show typing indicator
+      setMessages(prev => [...prev, { sender: 'bot', text: 'Typing...', isTyping: true }]);
+      
+      const response = await client.post('/chat/ask', { message: userMsg });
+      
+      // Remove typing indicator and add response
+      setMessages(prev => prev.filter(msg => !msg.isTyping).concat({ sender: 'bot', text: response.data.reply }));
+    } catch (error) {
+      console.error(error);
+      setMessages(prev => prev.filter(msg => !msg.isTyping).concat({ 
+        sender: 'bot', 
+        text: "I'm having trouble connecting right now. Please try again later."
+      }));
+    }
+  };
+
+  return (
+    <>
+      {isExpanded && (
+        <div className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsExpanded(false)}></div>
+      )}
+      <div className={
+        isExpanded
+          ? "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-2xl h-[85vh] z-50 bg-[#0f172a] sm:bg-white rounded-[2rem] p-6 sm:p-8 shadow-2xl border border-slate-700 sm:border-slate-200 flex flex-col transition-all duration-300"
+          : "bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100 h-[22rem] flex flex-col hover:shadow-md transition-shadow relative z-10"
+      }>
+         <div className="flex items-center gap-3 border-b border-slate-200/50 pb-4 mb-4 shrink-0">
+            <div className="relative">
+               <div className="w-8 h-8 rounded-full shadow-sm border border-white bg-slate-200 overflow-hidden flex items-center justify-center">
+                  <span className="text-xl">👩‍⚕️</span>
+               </div>
+               <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full"></div>
+            </div>
+            <h3 className={`font-bold text-sm tracking-tight ${isExpanded ? 'text-white sm:text-slate-800' : 'text-slate-800'}`}>Sarah Alex</h3>
+            
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)} 
+              className="ml-auto text-slate-400 hover:text-indigo-500 transition-colors p-1"
+              title={isExpanded ? "Minimize" : "Expand to Fullscreen"}
+            >
+              {isExpanded ? (
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path></svg>
+              ) : (
+                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+              )}
+            </button>
+         </div>
+
+         <div className="flex-1 overflow-y-auto pr-2 space-y-5 hide-scrollbar flex flex-col">
+           {messages.map((msg, i) => (
+             <div key={i} className={`flex items-start gap-3 ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}>
+               <div className={msg.sender === 'user' ? 'text-right max-w-[85%]' : 'max-w-[85%]'}>
+                  <div className={`p-3.5 text-[11px] sm:text-sm font-bold leading-relaxed shadow-sm ${
+                    msg.sender === 'user'
+                    ? 'bg-slate-50 border border-slate-100 rounded-[1.25rem] rounded-tr-sm text-slate-500' 
+                    : 'bg-indigo-50 border border-indigo-100 rounded-[1.25rem] rounded-tl-sm text-slate-600 text-left'
+                  }`}>
+                    {msg.isTyping ? <span className="animate-pulse">Typing...</span> : msg.text}
+                  </div>
+               </div>
+               {msg.sender === 'bot' && <div className="w-6 h-6 rounded-full bg-slate-100 shrink-0 shadow-sm border border-white mt-1 flex items-center justify-center text-[10px]">✨</div>}
+             </div>
+           ))}
+         </div>
+
+         <div className="mt-5 pt-4 border-t border-slate-200/50 flex items-center justify-between text-slate-400 text-[11px] sm:text-sm font-bold px-2 relative group focus-within:text-indigo-500 shrink-0">
+           <input
+             type="text"
+           value={inputValue}
+           onChange={(e) => setInputValue(e.target.value)}
+           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+           placeholder="Type here...." 
+           className={`bg-transparent border-0 outline-none w-full pr-10 tracking-wide ${isExpanded ? 'text-white sm:text-slate-600 placeholder-slate-400' : 'text-slate-600 placeholder-slate-300'}`}
+         />
+         <svg
+           onClick={handleSend}
+           width="18"
+           height="18"
+           fill="none"
+           stroke="currentColor"
+           strokeWidth="2"
+           viewBox="0 0 24 24"
+           className={`absolute right-2 cursor-pointer transition-colors ${isExpanded ? 'text-white sm:text-slate-400 hover:text-indigo-400' : 'text-slate-400 hover:text-indigo-500'}`}
+         >
+           <path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+         </svg>
+       </div>
+    </div>
+    </>
+  );
 }
