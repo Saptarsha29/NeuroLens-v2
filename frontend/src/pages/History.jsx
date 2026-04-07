@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import client from '../api/client'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
+import { IndividualReportTemplate, ComparisonReportTemplate } from '../components/ReportTemplates'
 
 function StatusBadge({ score }) {
   if (score >= 80) return <span className="badge-healthy">Healthy</span>
@@ -13,6 +16,11 @@ export default function History() {
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  
+  const [selectedResultData, setSelectedResultData] = useState(null)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
+  const individualPdfRef = useRef(null)
+  const comparisonPdfRef = useRef(null)
 
   const handleRowClick = (r) => {
     // Reconstruct the status tracking for the detailed Results view
@@ -25,6 +33,49 @@ export default function History() {
       status_color
     }))
     navigate('/results')
+  }
+
+  const generatePDF = async (elementRef, filename) => {
+    try {
+      setIsGeneratingPdf(true)
+      // Allow small delay for chart.js animations or state updates to reflect in DOM
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      const canvas = await html2canvas(elementRef.current, {
+        scale: 2, // High resolution
+        backgroundColor: '#0f172a',
+        useCORS: true
+      })
+      
+      const imgData = canvas.toDataURL('image/png')
+      const pdf = new jsPDF('l', 'mm', [canvas.width / 2, canvas.height / 2])
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight)
+      pdf.save(filename)
+    } catch (error) {
+      console.error('Failed to generate PDF', error)
+      alert("Failed to generate PDF. Please try again.")
+    } finally {
+      setIsGeneratingPdf(false)
+      setSelectedResultData(null)
+    }
+  }
+
+  const downloadTestResult = (e, r) => {
+    e.stopPropagation()
+    setSelectedResultData(r)
+    // Wait for the component to render the selected data, then generate PDF
+    setTimeout(() => {
+      generatePDF(individualPdfRef, `NeuroLens_Report_${new Date(r.created_at_iso || r.date).getTime()}.pdf`)
+    }, 100)
+  }
+
+  const downloadComparison = () => {
+    if (!results || results.length === 0) return
+    generatePDF(comparisonPdfRef, `NeuroLens_Comparison_Report_${new Date().getTime()}.pdf`)
   }
 
   useEffect(() => {
@@ -48,7 +99,28 @@ export default function History() {
           <h1 className="text-3xl font-bold text-slate-100">Test History</h1>
           <p className="text-slate-400 mt-1">All your past neurological screenings</p>
         </div>
-        <Link to="/tests" className="btn-primary">New Test</Link>
+        <div className="flex gap-4 items-center">
+          {results.length > 1 && (
+            <button 
+              onClick={downloadComparison} 
+              disabled={isGeneratingPdf}
+              className="btn-secondary flex items-center gap-2 disabled:opacity-50"
+            >
+              {isGeneratingPdf ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-cyan-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" lookup="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  Compare Results
+                </>
+              )}
+            </button>
+          )}
+          <Link to="/tests" className="btn-primary">New Test</Link>
+        </div>
       </div>
 
       {loading && <p className="text-slate-500 animate-pulse">Loading history…</p>}
@@ -69,7 +141,7 @@ export default function History() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-900/50 border-b border-slate-700/50">
-                  {['Date & Time', 'Voice', 'Spiral', 'Tap', 'Final Score', 'Status'].map((h) => (
+                  {['Date & Time', 'Voice', 'Spiral', 'Tap', 'Final Score', 'Status', 'Download'].map((h) => (
                     <th key={h} className="text-left px-4 py-3 font-semibold text-slate-300 whitespace-nowrap">
                       {h}
                     </th>
@@ -109,6 +181,20 @@ export default function History() {
                     <td className="px-4 py-3">
                       <StatusBadge score={r.final_score} />
                     </td>
+                    <td className="px-4 py-3">
+                      <button 
+                        onClick={(e) => downloadTestResult(e, r)}
+                        disabled={isGeneratingPdf}
+                        className="text-slate-400 hover:text-cyan-400 p-2 rounded-lg hover:bg-slate-700/50 transition-colors tooltip tooltip-left disabled:opacity-50"
+                        data-tip={isGeneratingPdf ? "Processing..." : "Download Report"}
+                      >
+                        {isGeneratingPdf && selectedResultData?.id === r.id ? (
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        ) : (
+                          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        )}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -116,6 +202,12 @@ export default function History() {
           </div>
         </div>
       )}
+
+      {/* Hidden containers for PDF generation */}
+      <div style={{ position: 'fixed', top: '-10000px', left: '-10000px', zIndex: -100, pointerEvents: 'none' }}>
+        <IndividualReportTemplate ref={individualPdfRef} data={selectedResultData} />
+        <ComparisonReportTemplate ref={comparisonPdfRef} results={results} />
+      </div>
     </div>
   )
 }
