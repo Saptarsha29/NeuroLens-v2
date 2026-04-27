@@ -1,6 +1,6 @@
 ﻿# NeuroLens v2
 
-NeuroLens v2 is a comprehensive web application designed for analyzing and screening Parkinson's disease through various interactive tests, including Spiral Drawings, Tapping Tests, and Voice recordings. It uses Machine Learning models on the backend to provide metrics and scores.
+NeuroLens is a comprehensive web application designed for analyzing and screening Parkinson's disease through various interactive tests, including Spiral Drawings, Tapping Tests, and Voice recordings. It uses Machine Learning models on the backend to provide metrics and scores.
 
 ## Project Structure
 
